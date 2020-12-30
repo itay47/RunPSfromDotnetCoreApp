@@ -3,22 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Threading.Tasks;
 using Microsoft.PowerShell;
 
 namespace RunPSfromDotnetCoreApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var filename = "D:\\createfiles.ps1";
 
             Console.WriteLine($"calling {filename} - no params");
-            var res = RunScript(filename);
+            var res = await RunScript(filename);
             WriteOutput(res);
 
             Console.WriteLine($"calling {filename} - with params");
-            var res2 = RunScript(
+            var res2 = await RunScript(
                 filename, 
                 new CommandParameterCollection() 
                     { 
@@ -50,8 +51,9 @@ namespace RunPSfromDotnetCoreApp
         /// <param name="scriptFullPath">The full file path for the .ps1 file.</param>
         /// <param name="parameters">The parameters for the script, can be null.</param>
         /// <returns>The output from the PowerShell execution.</returns>
-        public static ICollection<PSObject> RunScript(string scriptFullPath, ICollection<CommandParameter> parameters = null)
+        public async static Task<ICollection<PSObject>> RunScript(string scriptFullPath, ICollection<CommandParameter> parameters = null)
         {
+            ///
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
             initialSessionState.ExecutionPolicy = ExecutionPolicy.Unrestricted;
 
@@ -72,7 +74,7 @@ namespace RunPSfromDotnetCoreApp
 
 
                     var results = pipeline.Invoke();
-                    return results;
+                    return await Task.FromResult(results);
                 }
             }
         }
