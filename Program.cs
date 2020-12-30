@@ -55,25 +55,26 @@ namespace RunPSfromDotnetCoreApp
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
             initialSessionState.ExecutionPolicy = ExecutionPolicy.Unrestricted;
 
-            var runspace = RunspaceFactory.CreateRunspace(initialSessionState);
-            runspace.Open();
-            var pipeline = runspace.CreatePipeline();
-
-            var cmd = new Command(scriptFullPath);
-            if (parameters != null)
+            using (var runspace = RunspaceFactory.CreateRunspace(initialSessionState))
             {
-                foreach (var p in parameters)
+                runspace.Open();
+                using (var pipeline = runspace.CreatePipeline())
                 {
-                    cmd.Parameters.Add(p);
+                    var cmd = new Command(scriptFullPath);
+                    if (parameters != null)
+                    {
+                        foreach (var p in parameters)
+                        {
+                            cmd.Parameters.Add(p);
+                        }
+                    }
+                    pipeline.Commands.Add(cmd);
+
+
+                    var results = pipeline.Invoke();
+                    return results;
                 }
             }
-            pipeline.Commands.Add(cmd);
-            
-
-            var results = pipeline.Invoke();
-            pipeline.Dispose();
-            runspace.Dispose();
-            return results;
         }
     }
 }
