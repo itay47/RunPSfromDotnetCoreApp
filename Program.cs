@@ -13,17 +13,37 @@ namespace RunPSfromDotnetCoreApp
         {
             var filename = "D:\\createfiles.ps1";
 
-            Console.WriteLine($"calling {filename}");
-
+            Console.WriteLine($"calling {filename} - no params");
             var res = RunScript(filename);
+            WriteOutput(res);
 
-            foreach (var item in res)
+            Console.WriteLine($"calling {filename} - with params");
+            var res2 = RunScript(
+                filename, 
+                new CommandParameterCollection() 
+                    { 
+                        new CommandParameter("MyName","Itay")
+                    }
+                );
+            WriteOutput(res2);
+
+            Exit();
+        }
+
+        private static void WriteOutput(ICollection<PSObject> Results)
+        {
+            foreach (var item in Results)
             {
                 Console.WriteLine($"returned: {item}");
             }
+        }
+
+        private static void Exit()
+        {
             Console.WriteLine("Press Enter to continue...");
             Console.ReadLine();
         }
+
         /// <summary>
         /// Runs a PowerShell script taking it's path and parameters.
         /// </summary>
@@ -36,7 +56,7 @@ namespace RunPSfromDotnetCoreApp
             initialSessionState.ExecutionPolicy = ExecutionPolicy.Unrestricted;
 
             var runspace = RunspaceFactory.CreateRunspace(initialSessionState);
-            runspace.OpenAsync();
+            runspace.Open();
             var pipeline = runspace.CreatePipeline();
 
             var cmd = new Command(scriptFullPath);
