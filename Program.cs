@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Threading.Tasks;
@@ -53,7 +52,7 @@ namespace RunPSfromDotnetCoreApp
         /// <returns>The output from the PowerShell execution.</returns>
         public async static Task<ICollection<PSObject>> RunScript(string scriptFullPath, ICollection<CommandParameter> parameters = null)
         {
-            ///
+            // Requires to run external scripts otherwise we'll get ExecutionPolicy exception!
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
             initialSessionState.ExecutionPolicy = ExecutionPolicy.Unrestricted;
 
