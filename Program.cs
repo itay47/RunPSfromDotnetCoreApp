@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using Microsoft.PowerShell;
 
 namespace RunPSfromDotnetCoreApp
 {
@@ -9,7 +11,18 @@ namespace RunPSfromDotnetCoreApp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var filename = "D:\\createfiles.ps1";
+
+            Console.WriteLine($"calling {filename}");
+
+            var res = RunScript(filename);
+
+            foreach (var item in res)
+            {
+                Console.WriteLine($"returned: {item}");
+            }
+            Console.WriteLine("Press Enter to continue...");
+            Console.ReadLine();
         }
         /// <summary>
         /// Runs a PowerShell script taking it's path and parameters.
@@ -19,9 +32,13 @@ namespace RunPSfromDotnetCoreApp
         /// <returns>The output from the PowerShell execution.</returns>
         public static ICollection<PSObject> RunScript(string scriptFullPath, ICollection<CommandParameter> parameters = null)
         {
-            var runspace = RunspaceFactory.CreateRunspace();
-            runspace.Open();
+            InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
+            initialSessionState.ExecutionPolicy = ExecutionPolicy.Unrestricted;
+
+            var runspace = RunspaceFactory.CreateRunspace(initialSessionState);
+            runspace.OpenAsync();
             var pipeline = runspace.CreatePipeline();
+
             var cmd = new Command(scriptFullPath);
             if (parameters != null)
             {
@@ -31,6 +48,8 @@ namespace RunPSfromDotnetCoreApp
                 }
             }
             pipeline.Commands.Add(cmd);
+            
+
             var results = pipeline.Invoke();
             pipeline.Dispose();
             runspace.Dispose();
